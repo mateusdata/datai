@@ -1,7 +1,10 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
+import { BsClipboardDataFill } from "react-icons/bs";
+import { FaCircleArrowUp, FaPlus } from "react-icons/fa6";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
+import { toast } from "react-toastify";
 
 export default function App() {
   const [messages, setMessages] = useState<{ role: string; content: string }[]>([]);
@@ -44,6 +47,8 @@ export default function App() {
         stream: true,
       }),
     });
+
+  
 
     if (!response.body) {
       throw new Error("Response body is null");
@@ -88,11 +93,22 @@ export default function App() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+
+
+  const notify = () => toast.info("Esta funcionalidade ainda não foi implementada.", {
+    position: "top-right",
+  });
+
   const copyToClipboard = (code: string, index: number) => {
     navigator.clipboard.writeText(code);
     setCurrentMessageIndex(index);
     setTimeout(() => setCurrentMessageIndex(null), 1000);
   };
+
+
+  const clearChat = () => { 
+    setMessages([]);
+  }
 
   const renderMessageContent = (content: string) => {
     const parts = content.split(/```([\s\S]+?)```/g);
@@ -119,8 +135,9 @@ export default function App() {
 
   return (
     <div className="h-screen w-screen bg-gray-900 text-white flex flex-col">
-      <header className="p-4 text-center text-lg font-bold bg-gray-800 shadow-md">
-        🤖 DatAI
+      <header onClick={notify} className="p-4 flex justify-center items-center gap-2 text-center text-lg font-bold bg-gray-800 shadow-md">
+        <BsClipboardDataFill color="white" />
+        <span>DatAI</span>
       </header>
 
       <div className="flex-1 overflow-y-auto p-6 space-y-4">
@@ -142,7 +159,9 @@ export default function App() {
 
       <div className="p-4 bg-gray-900 flex justify-center">
         <div className="flex items-center bg-gray-800 px-4 py-3 rounded-full w-full max-w-2xl shadow-md">
-          <button className="text-gray-400 hover:text-white transition">➕</button>
+          <button onClick={clearChat} className="text-gray-400 hover:text-white transition">
+            <FaPlus />
+          </button>
           <input
             type="text"
             className="flex-1 bg-transparent border-none outline-none text-white text-lg px-4 placeholder-gray-500"
@@ -151,13 +170,14 @@ export default function App() {
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && sendMessage()}
           />
-          <button className="text-gray-400 hover:text-white transition">⚙️</button>
+
           <button
             onClick={sendMessage}
-            className="ml-2 bg-blue-600 px-4 py-2 rounded-full text-white text-lg hover:bg-blue-700 transition"
+            className="ml-2 bg-gray-300 px-4 py-2 rounded-full text-white text-lg hover:bg-gray-100 transition"
             disabled={loading}
           >
-            🎤
+            <FaCircleArrowUp color="black" />
+
           </button>
         </div>
       </div>
