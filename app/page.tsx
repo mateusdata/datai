@@ -7,9 +7,6 @@ import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { toast } from "react-toastify";
 
-interface Window {
-  webkitSpeechRecognition: any;
-}
 
 
 export default function App() {
