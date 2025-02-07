@@ -27,7 +27,7 @@ export default function App() {
     setInput("");
     setLoading(true);
 
-    const response = await fetch("http://localhost:3001/api/chat", {
+    const response = await fetch("https://7b6b-2804-7d74-8f-e100-5d24-bfcf-7e97-301.ngrok-free.app/api/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
