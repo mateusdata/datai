@@ -78,7 +78,7 @@ export default function App() {
     setInput("");
     setLoading(true);
 
-    const response = await fetch(baseURI, {
+    const response = await fetch(baseURI2, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
