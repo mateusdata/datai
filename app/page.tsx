@@ -13,6 +13,9 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [currenMessageIndex, setCurrentMessageIndex] = useState<number | null>(null);
+ const baseURI = "https://889f-2804-7d74-8f-e100-3fee-3739-efb2-dbb2.ngrok-free.app/api/chat";
+ const baseURI2 = "https://7b6b-2804-7d74-8f-e100-5d24-bfcf-7e97-301.ngrok-free.app/api/chat";
+
 
   const startListening = () => {
     if (recognitionRef.current) {
@@ -73,7 +76,7 @@ export default function App() {
     setInput("");
     setLoading(true);
 
-    const response = await fetch("https://7b6b-2804-7d74-8f-e100-5d24-bfcf-7e97-301.ngrok-free.app/api/chat", {
+    const response = await fetch(baseURI2, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -183,7 +186,7 @@ export default function App() {
         <select
           value={selectedModel}
           onChange={handleChange}
-          className="p-2 border rounded-lg bg-gray-800 text-white"
+          className="p-2 border w-52 rounded-lg bg-gray-800 text-white outline-none border-none"
         >
           <option value="deepseek-v2">Modelo baseado em GP4-0</option>
           <option value="deepseek-r1">Modelo de Pensamento Profundo</option>
@@ -207,7 +210,7 @@ export default function App() {
               : "bg-gray-900 text-left"
               }`}
           >
-            <span className="block font-semibold">{msg.role === "user" ? "Você" : "DatAI"}</span>
+            <span className="block font-semibold">{msg.role === "user" ? "Você" : `DatAI ${selectedModel==="deepseek-r1" ? " - Pensamento Profundo": ''} `}</span>
             {renderMessageContent(msg.content)}
           </div>
         ))}
@@ -217,13 +220,13 @@ export default function App() {
 
       <div className="p-4 bg-gray-900 flex justify-center">
         <div className="flex items-center bg-gray-800 px-4 py-3 rounded-full w-full max-w-2xl shadow-md">
-          <button onClick={clearChat} className="text-gray-400 hover:text-white transition">
+          <button onClick={clearChat}    className="ml-2  px-2 py-2 rounded-full hover:text-white text-gray-300  hover:border-gray-500 text-lg border border-gray-700 transition">
             <FaPlus />
           </button>
           <input
             type="text"
             className="flex-1 bg-transparent border-none outline-none text-white text-lg px-4 placeholder-gray-500"
-            placeholder="Digite sua mensagem..."
+            placeholder="Envie sua mensagem para o DatAI"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && sendMessage()}
@@ -231,7 +234,7 @@ export default function App() {
 
           <button
             onClick={startListening}
-            className={`ml-2 px-4 py-2 rounded-full text-white text-lg transition ${isListening ? "bg-red-500" : "bg-gray-300 hover:bg-gray-100"}`}
+            className={`ml-2 px-4 py-2 rounded-full text-white text-lg transition ${isListening ? "bg-red-500 animate-pulse" : "bg-gray-300 hover:bg-gray-100"}`}
             disabled={loading}
           >
             <AiFillAudio color={isListening ? "white" : "black"} />
