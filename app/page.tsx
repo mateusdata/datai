@@ -177,23 +177,26 @@ export default function App() {
   };
   return (
     <div className="h-screen w-screen bg-gray-900 text-white flex flex-col">
-      <header onClick={notify} className="p-4 flex justify-center items-center gap-2 text-center text-lg font-bold bg-gray-800 shadow-md">
-        <div className="p-4 text-center w-full md:w-auto">
-          <select
-            value={selectedModel}
-            onChange={handleChange}
-            className="p-2 border rounded-lg bg-gray-800 text-white w-full md:w-auto"
-          >
-            <option value="deepseek-v2">Modelo baseado em GP4-0</option>
-            <option value="deepseek-r1">Modelo de Pensamento Profundo</option>
-          </select>
-        </div>
+      <header className="flex items-center md:px-28 justify-between bg-gray-800 p-4 shadow-md w-full">
+      {/* Select alinhado à esquerda */}
+      <div className="w-auto">
+        <select
+          value={selectedModel}
+          onChange={handleChange}
+          className="p-2 border rounded-lg bg-gray-800 text-white"
+        >
+          <option value="deepseek-v2">Modelo baseado em GP4-0</option>
+          <option value="deepseek-r1">Modelo de Pensamento Profundo</option>
+        </select>
+      </div>
 
-        <div className="flex items-center gap-2">
-          <BsClipboardDataFill color="white" />
-          <span>DatAI</span>
-        </div>
-      </header>
+      {/* Nome e Ícone do DatAI centralizados */}
+      <div className="flex items-center gap-2 text-white text-lg font-bold">
+        <BsClipboardDataFill color="white" />
+        <span>DatAI</span>
+      </div>
+    </header>
+
 
       <div className="flex-1 overflow-y-auto p-6 space-y-4">
         {messages.slice(1).map((msg, index) => (
