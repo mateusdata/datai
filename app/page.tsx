@@ -41,7 +41,7 @@ export default function App() {
       }
 
       if (recognitionRef.current) {
-        recognitionRef.current.onresult = (event: SpeechRecognitionEvent) => {
+        recognitionRef.current.onresult = (event: any) => {
           const transcript = event.results[0][0].transcript;
           setInput(transcript);
         };
@@ -81,7 +81,7 @@ export default function App() {
     setInput("");
     setLoading(true);
 
-    const response = await fetch(baseURI2, {
+    const response = await fetch(baseURI, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
