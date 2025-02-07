@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
+import { AiFillAudio } from "react-icons/ai";
 import { BsClipboardDataFill } from "react-icons/bs";
 import { FaCircleArrowUp, FaPlus } from "react-icons/fa6";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
@@ -12,6 +13,40 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [currenMessageIndex, setCurrentMessageIndex] = useState<number | null>(null);
+
+  const startListening = () => {
+    if (recognitionRef.current) {
+      recognitionRef.current.start();
+      setIsListening(true);
+    }
+  };
+
+  const recognitionRef = useRef<SpeechRecognition | null>(null);
+  const [isListening, setIsListening] = useState<boolean>(false); useEffect(() => {
+    if ("webkitSpeechRecognition" in window) {
+      const SpeechRecognition = window.webkitSpeechRecognition as any;
+      recognitionRef.current = new SpeechRecognition();
+      if (recognitionRef.current) {
+        recognitionRef.current.continuous = false;
+        recognitionRef.current.interimResults = false;
+        recognitionRef.current.lang = "pt-BR";
+      }
+
+      if (recognitionRef.current) {
+        recognitionRef.current.onresult = (event: SpeechRecognitionEvent) => {
+          const transcript = event.results[0][0].transcript;
+          setInput(transcript);
+        };
+      }
+
+      if (recognitionRef.current) {
+        recognitionRef.current.onend = () => setIsListening(false);
+      }
+    } else {
+      alert("Seu navegador não suporta reconhecimento de voz.");
+    }
+  }, []);
+
 
   const sendMessage = async () => {
     if (!input.trim()) return;
@@ -48,7 +83,7 @@ export default function App() {
       }),
     });
 
-  
+
 
     if (!response.body) {
       throw new Error("Response body is null");
@@ -106,9 +141,10 @@ export default function App() {
   };
 
 
-  const clearChat = () => { 
+  const clearChat = () => {
     setMessages([]);
   }
+
 
   const renderMessageContent = (content: string) => {
     const parts = content.split(/```([\s\S]+?)```/g);
@@ -170,6 +206,15 @@ export default function App() {
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && sendMessage()}
           />
+
+          <button
+            onClick={startListening}
+            className={`ml-2 px-4 py-2 rounded-full text-white text-lg transition ${isListening ? "bg-red-500" : "bg-gray-300 hover:bg-gray-100"}`}
+            disabled={loading}
+          >
+            <AiFillAudio color={isListening ? "white" : "black"} />
+          </button>
+
 
           <button
             onClick={sendMessage}
