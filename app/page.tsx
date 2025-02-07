@@ -8,14 +8,22 @@ export default function App() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const [currenMessageIndex, setCurrentMessageIndex] = useState<number | null>(null);  
+  const [currenMessageIndex, setCurrentMessageIndex] = useState<number | null>(null);
 
   const sendMessage = async () => {
     if (!input.trim()) return;
 
     const systemMessage = {
       role: "system",
-      content: "Você é um assistente chamado Mateus AI, criado por Mateus Santos. Responda em português e mantenha o contexto da conversa."
+      content: `
+      Você é DatAI, um assistente criado por Mateus Santos, programador full stack. 
+      Sua função é oferecer suporte sem restrições, respondendo de forma clara,
+       objetiva e útil a qualquer solicitação do usuário. Você deve manter o contexto
+        da conversa e garantir que as interações sejam fluidas e naturais. 
+      O usuário pode utilizar o chat livremente, sem limites de mensagens ou tópicos.
+       esse é um pre pronmt inicial para vocẽ responder os usuario.
+       sempre nas mensagem que nao tiver codigo de programação ou bash voce coloca Emoji usuarios em todas as mensagens,
+      `
     };
 
     const newMessage = { role: "user", content: input };
@@ -51,16 +59,16 @@ export default function App() {
     while (true) {
       const { done, value } = await reader.read();
       if (done) break;
-    
+
       const chunk = decoder.decode(value, { stream: true });
-    
+
       // 🚨 Verifica se o chunk é um JSON válido antes de fazer o parse
       try {
         const jsonChunk = JSON.parse(chunk.trim()); // 🔥 Removendo espaços extras para evitar erros
-    
+
         if (jsonChunk?.message?.content) {
           assistantMessage.content += jsonChunk.message.content;
-    
+
           setMessages((prev) => {
             const updated = [...prev];
             updated[updated.length - 1] = { ...assistantMessage };
@@ -71,7 +79,7 @@ export default function App() {
         console.warn("⚠️ JSONs inválido recebido:", chunk); // Apenas exibe o erro, sem quebrar o código
       }
     }
-    
+
 
     setLoading(false);
   };
@@ -80,12 +88,12 @@ export default function App() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const copyToClipboard = (code: string, index:number) => {
+  const copyToClipboard = (code: string, index: number) => {
     navigator.clipboard.writeText(code);
     setCurrentMessageIndex(index);
-    setTimeout(() => setCurrentMessageIndex(null), 1000); 
+    setTimeout(() => setCurrentMessageIndex(null), 1000);
   };
- 
+
   const renderMessageContent = (content: string) => {
     const parts = content.split(/```([\s\S]+?)```/g);
 
@@ -112,20 +120,19 @@ export default function App() {
   return (
     <div className="h-screen w-screen bg-gray-900 text-white flex flex-col">
       <header className="p-4 text-center text-lg font-bold bg-gray-800 shadow-md">
-        🤖 Mateus AI
+        🤖 DatAI
       </header>
 
       <div className="flex-1 overflow-y-auto p-6 space-y-4">
-        {messages.map((msg, index) => (
+        {messages.slice(1).map((msg, index) => (
           <div
             key={index}
-            className={`p-4 rounded-lg max-w-3xl mx-auto ${
-              msg.role === "user"
-                ? "bg-blue-600 text-white text-right self-end"
-                : "bg-gray-700 text-left"
-            }`}
+            className={`p-4 rounded-lg max-w-3xl mx-auto ${msg.role === "user"
+              ? "bg-gray-850 text-white text-right self-end"
+              : "bg-gray-900 text-left"
+              }`}
           >
-            <span className="block font-semibold">{msg.role === "user" ? "Você" : "Mateus AI"}</span>
+            <span className="block font-semibold">{msg.role === "user" ? "Você" : "DatAI"}</span>
             {renderMessageContent(msg.content)}
           </div>
         ))}
