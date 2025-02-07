@@ -20,16 +20,16 @@ export default function App() {
   const [currenMessageIndex, setCurrentMessageIndex] = useState<number | null>(null);
  const baseURI = "https://889f-2804-7d74-8f-e100-3fee-3739-efb2-dbb2.ngrok-free.app/api/chat";
  const baseURI2 = "https://7b6b-2804-7d74-8f-e100-5d24-bfcf-7e97-301.ngrok-free.app/api/chat";
+ const recognitionRef = useRef<any>(null);
 
 
   const startListening = () => {
-    if (recognitionRef.current) {
-      recognitionRef.current.start();
+    if (recognitionRef?.current) {
+      recognitionRef?.current.start();
       setIsListening(true);
     }
   };
 
-  const recognitionRef = useRef<any>(null);
   const [isListening, setIsListening] = useState<boolean>(false); useEffect(() => {
     if ("webkitSpeechRecognition" in window) {
       const SpeechRecognition = window.webkitSpeechRecognition as any;
