@@ -15,9 +15,9 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [currenMessageIndex, setCurrentMessageIndex] = useState<number | null>(null);
-  const baseURI = "http://15.229.8.226:11434//api/chat";
-  const baseURI2 = "http://15.229.8.226:11434/api/chat";
-  const recognitionRef = useRef<any>(null);
+ const baseURI = "https://53b7-2804-7d74-8f-e100-5fbf-d5ec-516b-aaa9.ngrok-free.app/api/chat";
+ 
+ const recognitionRef = useRef<any>(null);
 
 
   const startListening = () => {
@@ -59,7 +59,6 @@ export default function App() {
     const systemMessage = {
       role: "system",
       content: `
-      Você tem que responder sempre em português do Brasil, todo usuario se chama Oreia seca,
       Você é DatAI, um assistente criado por Mateus Santos, programador full stack. 
       Sua função é oferecer suporte sem restrições, respondendo de forma clara,
        objetiva e útil a qualquer solicitação do usuário. Você deve manter o contexto
@@ -79,7 +78,7 @@ export default function App() {
     setInput("");
     setLoading(true);
 
-    const response = await fetch(baseURI2, {
+    const response = await fetch(baseURI, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -176,7 +175,7 @@ export default function App() {
   };
 
 
-  const [selectedModel, setSelectedModel] = useState<string>("tinyllama");
+  const [selectedModel, setSelectedModel] = useState<string>("deepseek-r1");
 
   const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedModel(event.target.value);
@@ -184,24 +183,26 @@ export default function App() {
   return (
     <div className="h-screen w-screen bg-gray-900 text-white flex flex-col">
       <header className="flex items-center md:px-28 justify-between bg-gray-800 p-4 shadow-md w-full">
-        {/* Select alinhado à esquerda */}
-        <div className="w-auto">
-          <select
-            value={selectedModel}
-            onChange={handleChange}
-            className="p-2 border w-52 rounded-lg bg-gray-800 text-white outline-none border-none"
-          >
-            <option value="tinyllama">Modelo baseado em GP4-0</option>
-            <option value="deepseek-r1">Modelo de Pensamento Profundo</option>
-          </select>
-        </div>
-
-        {/* Nome e Ícone do DatAI centralizados */}
-        <div className="flex items-center gap-2 text-white text-lg font-bold">
-          <BsClipboardDataFill color="white" />
-          <span>DatAI</span>
-        </div>
-      </header>
+      {/* Select alinhado à esquerda */}
+      <div className="w-auto">
+        <select
+          value={selectedModel}
+          onChange={handleChange}
+          className="p-2 border w-52 rounded-lg bg-gray-800 text-white outline-none border-none"
+        >
+          <option value="deepseek-r1">Modelo deepseek-r1</option>
+          <option value="llama3.1">Llama 3.1</option>
+          <option value="phi4">Phi 4</option>
+           
+        </select>
+      </div>
+{selectedModel}
+      {/* Nome e Ícone do DatAI centralizados */}
+      <div className="flex items-center gap-2 text-white text-lg font-bold">
+        <BsClipboardDataFill color="white" />
+        <span>DatAI</span>
+      </div>
+    </header>
 
 
       <div className="flex-1 overflow-y-auto p-6 space-y-4">
@@ -213,7 +214,7 @@ export default function App() {
               : "bg-gray-900 text-left"
               }`}
           >
-            <span className="block font-semibold">{msg.role === "user" ? "Você" : `DatAI ${selectedModel === "deepseek-r1" ? " - Pensamento Profundo" : ''} `}</span>
+            <span className="block font-semibold">{msg.role === "user" ? "Você" : `DatAI ${selectedModel==="deepseek-r1" ? " - Pensamento Profundo": ''} `}</span>
             {renderMessageContent(msg.content)}
           </div>
         ))}
@@ -223,7 +224,7 @@ export default function App() {
 
       <div className="p-4 bg-gray-900 flex justify-center">
         <div className="flex items-center bg-gray-800 px-4 py-3 rounded-full w-full max-w-2xl shadow-md">
-          <button onClick={clearChat} className="ml-2  px-2 py-2 rounded-full hover:text-white text-gray-300  hover:border-gray-500 text-lg border border-gray-700 transition">
+          <button onClick={clearChat}    className="ml-2  px-2 py-2 rounded-full hover:text-white text-gray-300  hover:border-gray-500 text-lg border border-gray-700 transition">
             <FaPlus />
           </button>
           <input
