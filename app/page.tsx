@@ -15,8 +15,13 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [currenMessageIndex, setCurrentMessageIndex] = useState<number | null>(null);
-  const baseURI = "https://d8af-2804-7d74-8f-e100-bd5f-4e95-2822-ba95.ngrok-free.app/api/chat";
-  const [selectedModel, setSelectedModel] = useState<string>("erwan2/DeepSeek-R1-Distill-Qwen-1.5B");
+  const baseURI = "https://1b4e-2804-7d74-8f-e100-9808-68e1-7b4a-3f78.ngrok-free.app/api/chat";
+  //const baseURI = "https://d8af-2804-7d74-8f-e100-bd5f-4e95-2822-ba95.ngrok-free.app/api/chat";
+
+
+
+
+  const [selectedModel, setSelectedModel] = useState<string>("deepseek-v2");
 
 
   const recognitionRef = useRef<any>(null);
@@ -191,8 +196,8 @@ export default function App() {
             onChange={handleChange}
             className="p-2 border w-52 rounded-lg bg-gray-800 text-white outline-none border-none"
           >
-            <option value="erwan2/DeepSeek-R1-Distill-Qwen-1.5B">Modelo erwan2/DeepSeek-R1-Distill-Qwen-1.5B</option>
-            <option value="llama3.1">Llama 3.1</option>
+            <option value="deepseek-v2">deepseek-v2</option>
+            <option value="deepseek-r1">Modelo deepseek-r1</option>
             <option value="phi4">Phi 4</option>
 
           </select>
@@ -215,7 +220,7 @@ export default function App() {
               : "bg-gray-900 text-left"
               }`}
           >
-            <span className="block font-semibold">{msg.role === "user" ? "Você" : `DatAI ${selectedModel === "erwan2/DeepSeek-R1-Distill-Qwen-1.5B" ? " - Pensamento Profundo" : ''} `}</span>
+            <span className="block font-semibold">{msg.role === "user" ? "Você" : `DatAI ${selectedModel === "deepseek-r1" ? " - Pensamento Profundo" : ''} `}</span>
             {renderMessageContent(msg.content)}
           </div>
         ))}
