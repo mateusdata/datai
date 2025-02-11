@@ -203,7 +203,6 @@ export default function App() {
 
           </select>
         </div>
-        {selectedModel}
         {/* Nome e Ícone do DatAI centralizados */}
         <div className="flex items-center gap-2 text-white text-lg font-bold">
           <BsClipboardDataFill color="white" />
