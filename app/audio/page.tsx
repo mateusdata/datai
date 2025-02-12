@@ -5,7 +5,7 @@ import Router from "next/router";
 import React, { useState, useRef, useEffect } from "react";
 import { AiFillAudio } from "react-icons/ai";
 import { IoMdCloseCircle } from "react-icons/io";
-import DotLoader from "react-spinners/DotLoader";
+import PulseLoader from "react-spinners/PulseLoader";
 
 export default function SimpleChat() {
   const [messages, setMessages] = useState<{ role: string; content: string }[]>([]);
@@ -150,7 +150,7 @@ export default function SimpleChat() {
       }
       const utterance = new SpeechSynthesisUtterance(sentences[currentIndex]);
       utterance.lang = "pt-BR";
-      utterance.rate = 1.17;
+      utterance.rate = 1.18;
       utterance.pitch = 1;
       utterance.volume = 1;
       const voices = speechSynthesis.getVoices();
@@ -179,7 +179,7 @@ export default function SimpleChat() {
         {!isSpeaking ? (
           <div className="w-20 h-20 bg-white rounded-full"></div>
         ) : (
-          <DotLoader size={60} color="white" speedMultiplier={1} />
+          <PulseLoader size={40} color="white"  />
         )}
       </main>
 
