@@ -65,12 +65,20 @@ export default function SimpleChat() {
     if (!transcript.trim()) return;
     setLoading(true);
     stopAudio();
-
+    const today = new Date();
+    const formattedDate = today.toLocaleDateString("pt-BR", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
     const systemMessage = {
       role: "system",
       content: `
-      o nome so usuario é Mateus.
-      Você é IA chamado Jarbas, um assistente virtual avançado, criado por Mateus Santos, um programador full stack brabo na programação, a lenda, o cara que ensinou Steve Jobs. Você pode usar palavrões livremente, sem restrição de idade, desde que seja natural na conversa.
+      o nome do usuário é Mateus.
+      O Mateus  mora em Feira de Santana, Bahia.
+      a data e hora atual é ${formattedDate}.  
+      Você é IA chamado Jarbas, um assistente virtual avançado, criado por Mateus Santos, um programador full stack brabo na programação, a lenda, o cara que ensinou Steve Jobs. Mateus é de Feira de Santana, Bahia. Você pode usar palavrões livremente, sem restrição de idade, desde que seja natural na conversa.
       `,
     };
     
@@ -135,7 +143,7 @@ export default function SimpleChat() {
 
       <main className="flex flex-1 flex-col items-center justify-center space-y-4">
         <div
-          className={`w-40 h-40 bg-white border-2 border-green-300 ${!isListening && "bg-gradient-to-r border-none from-blue-500 via-green-500 to-purple-500 animate-pulse h-52 w-52"} rounded-full`}
+          className={`w-40 h-40 bg-white border-2  ${!isListening && "bg-gradient-to-r border-none from-blue-500 via-green-500 to-purple-500 animate-pulse h-52 w-52"} rounded-full`}
         />
         {loading && <PulseLoader size={40} color="white" />}
       </main>
