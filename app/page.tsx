@@ -1,4 +1,6 @@
 "use client";
+import { redirect } from "next/navigation";
+import Router from "next/router";
 import React, { useState, useEffect, useRef } from "react";
 import { AiFillAudio } from "react-icons/ai";
 import { BsClipboardDataFill } from "react-icons/bs";
@@ -28,6 +30,8 @@ export default function App() {
 
 
   const startListening = () => {
+    redirect("/audio");  
+    return
     if (recognitionRef?.current) {
       recognitionRef?.current.start();
       setIsListening(true);
@@ -188,7 +192,7 @@ export default function App() {
     setSelectedModel(event.target.value);
   };
   return (
-    <div className="h-screen w-screen bg-gray-900 text-white flex flex-col">
+    <div className="h-screen w-screen bg-gray-9 text-white flex flex-col">
       <header className="flex items-center md:px-28 justify-between bg-gray-800 p-4 shadow-md w-full">
         {/* Select alinhado à esquerda */}
         <div className="w-auto">
@@ -217,7 +221,7 @@ export default function App() {
             key={index}
             className={`p-4 rounded-lg max-w-3xl mx-auto ${msg.role === "user"
               ? "bg-gray-850 text-white text-right self-end"
-              : "bg-gray-900 text-left"
+              : "bg-gray-9 text-left"
               }`}
           >
             <span className="block font-semibold">{msg.role === "user" ? "Você" : `DatAI ${selectedModel === "deepseek-r1" ? " - Pensamento Profundo" : ''} `}</span>
@@ -228,7 +232,7 @@ export default function App() {
         <div ref={messagesEndRef} />
       </div>
 
-      <div className="p-4 bg-gray-900 flex justify-center">
+      <div className="p-4 bg-gray-9 flex justify-center">
         <div className="flex items-center bg-gray-800 px-4 py-3 rounded-full w-full max-w-2xl shadow-md">
           <button onClick={clearChat} className="ml-2  px-2 py-2 rounded-full hover:text-white text-gray-300  hover:border-gray-500 text-lg border border-gray-700 transition">
             <FaPlus />
