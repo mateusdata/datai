@@ -1,7 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
-import Router from "next/router";
+import { redirect, useRouter, useSearchParams } from "next/navigation";
 import React, { useState, useRef, useEffect } from "react";
 import { AiFillAudio } from "react-icons/ai";
 import { IoMdCloseCircle } from "react-icons/io";
@@ -14,8 +13,10 @@ export default function SimpleChat() {
   const [isListening, setIsListening] = useState<boolean>(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const baseURI = "https://1b4e-2804-7d74-8f-e100-9808-68e1-7b4a-3f78.ngrok-free.app/api/chat";
+
   const params = useSearchParams();
   const model = params.get("query") || "deepseek-v2";
+
   const recognitionRef = useRef<any>(null);
   const autoSendTimerRef = useRef<number | null>(null);
   const transcriptRef = useRef("");
@@ -65,6 +66,8 @@ export default function SimpleChat() {
     }
   }, [loading]);
 
+
+
   useEffect(() => {
     recognitionRef.current.start();
     setIsListening(true);
@@ -88,11 +91,7 @@ export default function SimpleChat() {
     const systemMessage = {
       role: "system",
       content:
-        `
-        Todos os usuários se chamam Orelha seca, você deve chamá-los assim. Você é DatAI, um assistente  atualmente estouusndo o modelo ${model}
-        criado por Mateus Santos, programador full stack. Sua função é responder de forma clara, objetiva
-         e útil a qualquer solicitação do usuário.
-        `
+        "Todos os usuários se chamam Orelha seca, você deve chamá-los assim. Você é DatAI, um assistente criado por Mateus Santos, programador full stack. Sua função é responder de forma clara, objetiva e útil a qualquer solicitação do usuário."
     };
 
     const userMessage = { role: "user", content: transcriptRef.current };
@@ -113,7 +112,7 @@ export default function SimpleChat() {
         headers: { "Content-Type": "application/json" },
         signal: abortController.signal,
         body: JSON.stringify({
-          model: model,
+          model: "deepseek-v2",
           messages: updatedMessages,
           stream: false,
         }),
@@ -153,7 +152,7 @@ export default function SimpleChat() {
       }
       const utterance = new SpeechSynthesisUtterance(sentences[currentIndex]);
       utterance.lang = "pt-BR";
-      utterance.rate = 1.17;
+      utterance.rate = 1.18;
       utterance.pitch = 1;
       utterance.volume = 1;
       const voices = speechSynthesis.getVoices();
@@ -169,19 +168,20 @@ export default function SimpleChat() {
   };
 
   const goBack = () => {
-    Router.push("/");
+    redirect("/");
   };
 
   return (
     <div className="flex flex-col h-screen bg-gray-950 text-white">
       <header className="flex justify-end p-4 bg-gray-950">
+      model: {JSON.stringify(model)}
       </header>
 
       <main className="flex flex-1 items-center justify-center">
         {!isSpeaking ? (
           <div className="w-20 h-20 bg-white rounded-full"></div>
         ) : (
-          <PulseLoader size={40} color="white" />
+          <PulseLoader size={40} color="white"  />
         )}
       </main>
       <div className="p-4"></div>
