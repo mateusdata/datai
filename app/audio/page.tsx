@@ -14,13 +14,29 @@ export default function SimpleChat() {
   const [isListening, setIsListening] = useState<boolean>(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const baseURI = "https://1b4e-2804-7d74-8f-e100-9808-68e1-7b4a-3f78.ngrok-free.app/api/chat";
-  const params = useSearchParams();
-  const model = params.get("query") || "deepseek-v2";
+  
+
+
+  
   const recognitionRef = useRef<any>(null);
   const autoSendTimerRef = useRef<number | null>(null);
   const transcriptRef = useRef("");
   const fetchAbortControllerRef = useRef<AbortController | null>(null);
 
+
+  const [model, setModel] = useState("deepseek-v2");
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const modelParam = params.get("query");
+      if (modelParam) {
+        setModel(modelParam);
+      }
+    }
+  }, []);
+
+  
   useEffect(() => {
     if ("webkitSpeechRecognition" in window) {
       const SpeechRecognition = window.webkitSpeechRecognition as any;
