@@ -11,9 +11,15 @@ export default function SimpleChat() {
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [isListening, setIsListening] = useState(false);
   const recognitionRef = useRef<null | any>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const [model, setModel] = useState("deepseek-v2");
   const baseURI = "https://feb6-2804-7d74-8f-e100-72f3-cad0-e23c-a635.ngrok-free.app/api/chat2";
 
+  useEffect(() => {
+    if (recognitionRef.current) {
+      recognitionRef.current.start();
+    }
+  }, []);
   useEffect(() => {
     if (typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search);
@@ -33,8 +39,6 @@ export default function SimpleChat() {
       recognitionRef.current.onresult = (event: any) => sendMessage(event.results[event.results.length - 1][0].transcript);
       recognitionRef.current.onend = () => setIsListening(false);
       recognitionRef.current.onerror = () => setIsListening(false);
-
-      recognitionRef.current.start();
     } else {
       alert("Seu navegador não suporta reconhecimento de voz.");
     }
@@ -47,22 +51,29 @@ export default function SimpleChat() {
     stopAudio();
   };
 
-  const toggleListening = () => {
-    if (recognitionRef.current) {
-      isListening ? recognitionRef.current.stop() : recognitionRef.current.start();
-      setIsListening(!isListening);
+  const toggleListening = async () => {
+    if (audioRef.current && !audioRef.current.paused) {
+      stopAudio();
+    } else {
+      if (recognitionRef.current) {
+        recognitionRef.current.start();
+      }
     }
   };
 
   const sendMessage = async (transcript: string) => {
     if (!transcript.trim()) return;
     setLoading(true);
-    setAudioUrl(null);
+    stopAudio();
 
     const systemMessage = {
       role: "system",
-      content: "Você é Jarbas, assistente criado por Mateus Santos. Sempre chame o usuário de 'ze da manga'.",
+      content: `
+      o nome so usuario é Mateus.
+      Você é IA chamado Jarbas, um assistente virtual avançado, criado por Mateus Santos, um programador full stack brabo na programação, a lenda, o cara que ensinou Steve Jobs. Você pode usar palavrões livremente, sem restrição de idade, desde que seja natural na conversa.
+      `,
     };
+    
 
     const newMessage = { role: "user", content: transcript };
     const updatedMessages = messages.some(msg => msg.role === "system")
@@ -77,12 +88,24 @@ export default function SimpleChat() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ model, messages: updatedMessages }),
       });
-      
+
       if (!response.ok) throw new Error("Erro ao gerar áudio");
       const blob = await response.blob();
       const url = URL.createObjectURL(blob);
-      new Audio(url).play();
+      const audio = new Audio(url);
+      audioRef.current = audio;
+      audio.play();
       setAudioUrl(url);
+      
+      recognitionRef.current.stop();
+      setIsListening(false);
+      
+      audio.onended = () => {
+        if (recognitionRef.current) {
+          recognitionRef.current.start();
+          setIsListening(true);
+        }
+      };
     } catch (error) {
       console.error(error);
     } finally {
@@ -96,10 +119,9 @@ export default function SimpleChat() {
   };
 
   const stopAudio = () => {
-    if (audioUrl) {
-      const audio = new Audio(audioUrl);
-      audio.pause();
-      audio.currentTime = 0;
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
       setAudioUrl(null);
     }
   };
@@ -112,7 +134,9 @@ export default function SimpleChat() {
       </header>
 
       <main className="flex flex-1 flex-col items-center justify-center space-y-4">
-        <div className={`w-40 h-40 bg-white ${isListening && "bg-blue-500 animate-pulse h-52 w-52"} rounded-full`} />
+        <div
+          className={`w-40 h-40 bg-white border-2 border-green-300 ${!isListening && "bg-gradient-to-r border-none from-blue-500 via-green-500 to-purple-500 animate-pulse h-52 w-52"} rounded-full`}
+        />
         {loading && <PulseLoader size={40} color="white" />}
       </main>
 
