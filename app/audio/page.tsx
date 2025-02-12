@@ -175,6 +175,7 @@ export default function SimpleChat() {
   return (
     <div className="flex flex-col h-screen bg-gray-950 text-white">
       <header className="flex justify-end p-4 bg-gray-950">
+        <span>Usando model: {model}  </span>
       </header>
 
       <main className="flex flex-1 items-center justify-center">
