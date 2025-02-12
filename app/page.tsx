@@ -1,4 +1,5 @@
 "use client";
+import { api } from "@/config/api";
 import { useRouter } from "next/navigation";
 import React, { useState, useEffect, useRef } from "react";
 import { AiFillAudio } from "react-icons/ai";
@@ -18,8 +19,7 @@ export default function App() {
   const router = useRouter();
 
   const [currenMessageIndex, setCurrentMessageIndex] = useState<number | null>(null);
-  const baseURI = "https://1b4e-2804-7d74-8f-e100-9808-68e1-7b4a-3f78.ngrok-free.app/api/chat";
-  //const baseURI = "https://d8af-2804-7d74-8f-e100-bd5f-4e95-2822-ba95.ngrok-free.app/api/chat";
+ 
 
 
 
@@ -92,7 +92,7 @@ export default function App() {
     setInput("");
     setLoading(true);
 
-    const response = await fetch(baseURI, {
+    const response = await fetch(api, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

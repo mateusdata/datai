@@ -13,7 +13,7 @@ export default function SimpleChat() {
     setAudioUrl(null);
 
     try {
-      const response = await fetch("http://localhost:3001/api/chat2", {
+      const response = await fetch("https://1b4e-2804-7d74-8f-e100-9808-68e1-7b4a-3f78.ngrok-free.app/api/chat2", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

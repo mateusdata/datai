@@ -172,7 +172,7 @@ export default function SimpleChat() {
 
           <div className="flex flex-1 items-center justify-center">
             {!loading ? (
-              <div className={`w-40 h-40 bg-white ${isListening && "bg-gradient-to-r from-blue-500 via-blue-400 to-blue-700 border animate-pulse border-blue-600 w-52 h-5w-52"} rounded-full`}>
+              <div className={`w-40 h-40 bg-white ${isListening && "bg-gradient-to-r from-blue-500 via-blue-400 to-blue-700 border-2 animate-pulse border-blue-600 h-52 w-52"} rounded-full`}>
 
               </div>
             ) : (
