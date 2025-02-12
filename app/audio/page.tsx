@@ -15,7 +15,7 @@ export default function SimpleChat() {
   const recognitionRef = useRef<any>(null);
   const transcriptRef = useRef("");
   const [model, setModel] = useState("deepseek-v2");
-  const baseURI = "http://localhost:3001/api/chat2";
+  const baseURI = "https://feb6-2804-7d74-8f-e100-72f3-cad0-e23c-a635.ngrok-free.app/api/chat2";
   const [loading2, setLoading2] = useState(false);
 
   useEffect(() => {

@@ -92,7 +92,7 @@ export default function App() {
     setInput("");
     setLoading(true);
 
-    const response = await fetch("https://feb6-2804-7d74-8f-e100-72f3-cad0-e23c-a635.ngrok-free.app", {
+    const response = await fetch("https://feb6-2804-7d74-8f-e100-72f3-cad0-e23c-a635.ngrok-free.app/api/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

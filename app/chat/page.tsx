@@ -1,4 +1,5 @@
 "use client";
+import { api } from "@/config/api";
 import { useState } from "react";
 
 export default function SimpleChat() {
