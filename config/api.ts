@@ -1,4 +1,6 @@
 import axios from 'axios';
 
-const api = "https://1b4e-2804-7d74-8f-e100-9808-68e1-7b4a-3f78.ngrok-free.app"
+const api = "https://feb6-2804-7d74-8f-e100-72f3-cad0-e23c-a635.ngrok-free.app"
 export  {api};
+
+https://feb6-2804-7d74-8f-e100-72f3-cad0-e23c-a635.ngrok-free.app/
