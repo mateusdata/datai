@@ -4,11 +4,12 @@ import { AiFillAudio } from "react-icons/ai";
 import { IoMdCloseCircle } from "react-icons/io";
 import PulseLoader from "react-spinners/PulseLoader";
 import { redirect } from "next/navigation";
+import { isIOS } from "react-device-detect";
 
 export default function SimpleChat() {
   const [messages, setMessages] = useState<{ role: string; content: string }[]>([]);
   const [loading, setLoading] = useState(false);
-  const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [audioUrl, setAudioUrl] = useState<string | any>(null);
   const [isListening, setIsListening] = useState(false);
   const recognitionRef = useRef<null | any>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -81,7 +82,7 @@ export default function SimpleChat() {
       Você é IA chamado Jarbas, um assistente virtual avançado, criado por Mateus Santos, um programador full stack brabo na programação, a lenda, o cara que ensinou Steve Jobs. Mateus é de Feira de Santana, Bahia. Você pode usar palavrões livremente, sem restrição de idade, desde que seja natural na conversa.
       `,
     };
-    
+
 
     const newMessage = { role: "user", content: transcript };
     const updatedMessages = messages.some(msg => msg.role === "system")
@@ -104,10 +105,10 @@ export default function SimpleChat() {
       audioRef.current = audio;
       audio.play();
       setAudioUrl(url);
-      
+
       recognitionRef.current.stop();
       setIsListening(false);
-      
+
       audio.onended = () => {
         if (recognitionRef.current) {
           recognitionRef.current.start();
@@ -147,7 +148,11 @@ export default function SimpleChat() {
         />
         {loading && <PulseLoader size={40} color="white" />}
       </main>
-
+      {isIOS && (
+        <audio controls src={audioUrl} className="w-full">
+          Your browser does not support the audio element.
+        </audio>
+      )}
       <footer className="p-4 flex justify-center space-x-4">
         <button
           onClick={toggleListening}
@@ -158,6 +163,8 @@ export default function SimpleChat() {
         <button onClick={goBack} className="w-12 h-12 bg-gray-600 rounded-full flex items-center justify-center">
           <IoMdCloseCircle size={30} color="white" />
         </button>
+
+
       </footer>
     </div>
   );
