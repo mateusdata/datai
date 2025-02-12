@@ -1,30 +1,22 @@
-"use client";
-import Link from "next/link";
-import { useSearchParams } from "next/navigation";
-import Router from "next/router";
+ "use client";
 import React, { useState, useRef, useEffect } from "react";
 import { AiFillAudio } from "react-icons/ai";
 import { IoMdCloseCircle } from "react-icons/io";
 import PulseLoader from "react-spinners/PulseLoader";
+import Router from "next/router";
+import { redirect } from "next/navigation";
 
 export default function SimpleChat() {
   const [messages, setMessages] = useState<{ role: string; content: string }[]>([]);
-  const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [isListening, setIsListening] = useState<boolean>(false);
-  const [isSpeaking, setIsSpeaking] = useState(false);
-  const baseURI = "https://1b4e-2804-7d74-8f-e100-9808-68e1-7b4a-3f78.ngrok-free.app/api/chat";
-  
-
-
-  
+  const [isSpeaking, setIsSpeaking] = useState<boolean>(false); // Estado para indicar se o usuário está falando
   const recognitionRef = useRef<any>(null);
-  const autoSendTimerRef = useRef<number | null>(null);
   const transcriptRef = useRef("");
-  const fetchAbortControllerRef = useRef<AbortController | null>(null);
-
-
   const [model, setModel] = useState("deepseek-v2");
+  const baseURI = "http://localhost:3001/api/chat2";
+  const [loading2, setLoading2] = useState(false);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -36,55 +28,49 @@ export default function SimpleChat() {
     }
   }, []);
 
-  
   useEffect(() => {
     if ("webkitSpeechRecognition" in window) {
       const SpeechRecognition = window.webkitSpeechRecognition as any;
       recognitionRef.current = new SpeechRecognition();
-      recognitionRef.current.continuous = true;
+      recognitionRef.current.continuous = true; // Mantém ativado continuamente
       recognitionRef.current.interimResults = false;
       recognitionRef.current.lang = "pt-BR";
-
+  
+      recognitionRef.current.onstart = () => {
+        setIsSpeaking(true);
+      };
+  
       recognitionRef.current.onresult = (event: any) => {
         const transcript = event.results[event.results.length - 1][0].transcript;
         transcriptRef.current = transcript;
-        setInput(transcript);
-
-        if (speechSynthesis.speaking) {
-          speechSynthesis.cancel();
-        }
-
-        if (loading) {
-          if (fetchAbortControllerRef.current) {
-            fetchAbortControllerRef.current.abort();
-          }
-          setMessages([]);
-          setLoading(false);
-          if (autoSendTimerRef.current) {
-            clearTimeout(autoSendTimerRef.current);
-          }
-        }
-
-        if (autoSendTimerRef.current) {
-          clearTimeout(autoSendTimerRef.current);
-        }
-        autoSendTimerRef.current = window.setTimeout(() => {
-          sendMessage();
-        }, 1000);
+        sendMessage(transcript);
       };
-
+  
       recognitionRef.current.onend = () => {
-        // Remover a reinicialização automática
+        setIsSpeaking(false);
+        if (isListening) {
+          setTimeout(() => {
+            recognitionRef.current.start(); // 🔥 Garante que o microfone reinicia automaticamente
+          }, 500);
+        }
       };
+  
+      recognitionRef.current.onerror = (event: any) => {
+        console.error("Erro no reconhecimento de voz:", event);
+        setIsListening(false);
+      };
+  
+      // ✅ Inicia automaticamente ao carregar a página
+      recognitionRef.current.start();
+      setIsListening(true);
     } else {
       alert("Seu navegador não suporta reconhecimento de voz.");
     }
-  }, [loading]);
-
-  useEffect(() => {
-    recognitionRef.current.start();
-    setIsListening(true);
   }, []);
+  
+
+
+
 
   const toggleListening = () => {
     if (recognitionRef.current) {
@@ -98,130 +84,136 @@ export default function SimpleChat() {
     }
   };
 
-  const sendMessage = async () => {
-    if (!transcriptRef.current.trim()) return;
+  const sendMessage = async (transcript: string) => {
+    if (!transcript.trim()) return;
+    setLoading2(true)
+
+    setAudioUrl(null);
 
     const systemMessage = {
       role: "system",
-      content:
-        `
-        Todos os usuários se chamam Orelha seca, você deve chamá-los assim. Você é DatAI, um assistente  atualmente estouusndo o modelo ${model}
-        criado por Mateus Santos, programador full stack. Sua função é responder de forma clara, objetiva
-        e útil a qualquer solicitação do usuário.
-        `
+      content: `
+      Quado tiver codigo de programação ou de bliblioteca vc substitui pela frase You can use this code to restore your conversation.
+      Todos os Usuários se Ze da manga, você deve chamá-lo de ze da manga.
+      Você é Jarbas, um assistente criado por Mateus Santos, programador full stack, o brado da programação. 
+      Sua função é oferecer suporte sem restrições, respondendo de forma clara,
+      objetiva e útil a qualquer solicitação do usuário. Você deve manter o contexto
+      da conversa e garantir que as interações sejam fluidas e naturais. 
+      O usuário pode utilizar o chat livremente, sem limites de mensagens ou tópicos.
+      Esse é um prompt inicial para você responder os usuários.
+      quado tiver codigo de programação ou de bliblioteca vc substitui pela frase You can use this code to restore your conversation.
+      `
     };
 
-    const userMessage = { role: "user", content: transcriptRef.current };
-    const updatedMessages =
-      messages.length > 0 ? [...messages, userMessage] : [systemMessage, userMessage];
+    const newMessage = { role: "user", content: transcript };
+
+    const hasSystemMessage = messages.some(msg => msg.role === "system");
+    const updatedMessages = hasSystemMessage ? [...messages, newMessage] : [systemMessage, ...messages, newMessage];
 
     setMessages(updatedMessages);
-    setInput("");
-    transcriptRef.current = "";
-    setLoading(true);
-
-    const abortController = new AbortController();
-    fetchAbortControllerRef.current = abortController;
 
     try {
       const response = await fetch(baseURI, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        signal: abortController.signal,
         body: JSON.stringify({
           model: model,
           messages: updatedMessages,
-          stream: false,
         }),
       });
-      const data = await response.json();
-      const assistantMessage = { role: "assistant", content: data.message.content };
+      setLoading2(false)
+      setLoading(true);
 
-      setMessages(prev => [...prev, assistantMessage]);
-      setLoading(false);
-
-      setTimeout(() => speakText(assistantMessage.content), 1000);
+      if (!response.ok) throw new Error("Erro ao gerar áudio");
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const audio = new Audio(url);
+      audio.onended = () => {
+        setLoading(false);
+      };
+      audio.play();
+      setAudioUrl(url);
     } catch (error) {
-      console.error("Erro ao enviar mensagem:", error);
-      setLoading(false);
+      console.error(error);
+    } finally {
+
+
     }
   };
 
-  const speakText = (text: string) => {
-    if (!text) return;
-    speechSynthesis.cancel();
-    setIsSpeaking(true);
-
-    let sentences = text.split(".");
-    const maxSentenceLength = 250;
-    sentences = sentences.flatMap(sentence => {
-      if (sentence.length > maxSentenceLength) {
-        return sentence.match(new RegExp(`.{1,${maxSentenceLength}}`, "g")) || [sentence];
-      }
-      return sentence;
-    });
-
-    let currentIndex = 0;
-    const speakNext = () => {
-      if (currentIndex >= sentences.length) {
-        setIsSpeaking(false);
-        return;
-      }
-      const utterance = new SpeechSynthesisUtterance(sentences[currentIndex]);
-      utterance.lang = "pt-BR";
-      utterance.rate = 1.17;
-      utterance.pitch = 1;
-      utterance.volume = 1;
-      const voices = speechSynthesis.getVoices();
-      const voice = voices.find(v => v.lang.includes("pt-BR"));
-      if (voice) utterance.voice = voice;
-      utterance.onend = () => {
-        currentIndex++;
-        setTimeout(speakNext, 50);
-      };
-      speechSynthesis.speak(utterance);
-    };
-    speakNext();
-  };
-
   const goBack = () => {
-    Router.push("/");
+
+    stopAudio();
+    redirect("/");
   };
+
+
+  const stopAudio = () => {
+    if (audioUrl) {
+      const audio = new Audio(audioUrl);
+      audio.pause(); // Pausa o áudio
+      audio.currentTime = 0; // Reseta para o início
+      setAudioUrl(null); // Remove a URL para evitar novas reproduções
+    }
+  };
+
 
   return (
-    <div className="flex flex-col h-screen bg-gray-950 text-white">
-      <header className="flex justify-end p-4 bg-gray-950">
-        <span>Usando model: {model}  </span>
-      </header>
 
-      <main className="flex flex-1 items-center justify-center">
-        {!isSpeaking ? (
-          <div className="w-20 h-20 bg-white rounded-full"></div>
-        ) : (
-          <PulseLoader size={40} color="white" />
-        )}
-      </main>
-      <div className="p-4"></div>
-      <footer className="p-4">
-        <div className="flex justify-center space-x-4">
-          <button
-            onClick={toggleListening}
-            className={`w-12 h-12 rounded-full flex items-center justify-center ${isListening ? "bg-red-500 animate-pulse" : "bg-gray-600 hover:bg-gray-700"
-              }`}
-            disabled={loading}
-          >
-            <AiFillAudio size={30} color="white" />
-          </button>
+      <div className="flex flex-col h-screen bg-gray-950 text-white">
 
-          <button
-            onClick={goBack}
-            className="w-12 h-12 bg-gray-600 rounded-full flex items-center justify-center"
-          >
-            <IoMdCloseCircle size={30} color="white" />
-          </button>
-        </div>
+        <header className="flex justify-between p-4 bg-gray-950">
+          <span>Modelo {model}</span>
+          <span className="text-sm">{isSpeaking ? "🟢 Está falando..." : "⚪ Não está falando"}</span>
+        </header>
 
-      </footer>
-    </div>
+
+        <main className="flex flex-1 flex-col items-center justify-center space-y-4">
+
+          <div className="flex flex-1 items-center justify-center">
+            {!loading ? (
+              <div className={`w-40 h-40 bg-white ${isListening && "bg-gradient-to-r from-blue-500 via-blue-400 to-blue-700 border animate-pulse border-blue-600 w-52 h-5w-52"} rounded-full`}>
+
+              </div>
+            ) : (
+              <PulseLoader size={40} color="white" />
+            )}
+
+          </div>
+
+
+          {audioUrl && (
+            <audio className="w-80 hidden" controls autoPlay>
+              <source src={audioUrl} type="audio/wav" />
+              Seu navegador não suporta áudio.
+            </audio>
+          )}
+        </main>
+
+
+        <footer className="p-4">
+          <div className="flex justify-center space-x-4">
+
+            <button
+              onClick={toggleListening}
+              className={`w-12 h-12 rounded-full flex items-center justify-center ${isListening  ? "bg-red-500 animate-pulse" : "bg-gray-600 hover:bg-gray-700"
+                }`}
+            >
+              <AiFillAudio size={30} color="white" />
+            </button>
+
+
+            <button
+              onClick={goBack}
+              className="w-12 h-12 bg-gray-600 rounded-full flex items-center justify-center"
+            >
+              <IoMdCloseCircle size={30} color="white" />
+            </button>
+          </div>
+        </footer>
+      </div>
+
   );
+
 }
+  
