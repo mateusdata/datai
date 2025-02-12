@@ -65,7 +65,6 @@ export default function SimpleChat() {
     if (!transcript.trim()) return;
     setLoading(true);
     stopAudio();
-  
     const today = new Date();
     const formattedDate = today.toLocaleDateString("pt-BR", {
       weekday: "long",
@@ -73,76 +72,43 @@ export default function SimpleChat() {
       month: "long",
       day: "numeric",
     });
-  
     const systemMessage = {
       role: "system",
       content: `
       o nome do usuário é Mateus.
-      O Mateus mora em Feira de Santana, Bahia.
+      O Mateus  mora em Feira de Santana, Bahia.
       a data e hora atual é ${formattedDate}.  
       Você é IA chamado Jarbas, um assistente virtual avançado, criado por Mateus Santos, um programador full stack brabo na programação, a lenda, o cara que ensinou Steve Jobs. Mateus é de Feira de Santana, Bahia. Você pode usar palavrões livremente, sem restrição de idade, desde que seja natural na conversa.
       `,
     };
-  
+    
+
     const newMessage = { role: "user", content: transcript };
     const updatedMessages = messages.some(msg => msg.role === "system")
       ? [...messages, newMessage]
       : [systemMessage, ...messages, newMessage];
-  
+
     setMessages(updatedMessages);
-  
+
     try {
       const response = await fetch(baseURI, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ model, messages: updatedMessages }),
       });
-  
+
       if (!response.ok) throw new Error("Erro ao gerar áudio");
-  
       const blob = await response.blob();
       const url = URL.createObjectURL(blob);
+      const audio = new Audio(url);
+      audioRef.current = audio;
+      audio.play();
       setAudioUrl(url);
-  
-      // Detecta se é iOS
-      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-  
-      if (isIOS) {
-        console.log("Rodando no iOS, tentando desbloquear áudio...");
-  
-        // Criar um contexto de áudio
-        const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-        if (audioContext.state === "suspended") {
-          await audioContext.resume();
-        }
-  
-        // Criar um novo elemento de áudio
-        const audio = new Audio(url);
-        audioRef.current = audio;
-  
-        // Forçar carregamento antes de tocar (hack para iOS)
-        audio.load();
-  
-        // Tocar o áudio dentro de um evento de usuário (garantia)
-        document.body.addEventListener("click", () => {
-          audio.play().catch((err) => console.error("Erro ao forçar reprodução no iOS:", err));
-        });
-  
-        setTimeout(() => {
-          audio.play().catch((err) => console.error("Erro ao reproduzir áudio no iOS:", err));
-        }, 500);
-      } else {
-        // Método normal para outras plataformas
-        const audio = new Audio(url);
-        audioRef.current = audio;
-        audio.play();
-      }
-  
-      recognitionRef.current?.stop();
+      
+      recognitionRef.current.stop();
       setIsListening(false);
-  
-      // Quando o áudio terminar, retomar a escuta
-      audioRef.current.onended = () => {
+      
+      audio.onended = () => {
         if (recognitionRef.current) {
           recognitionRef.current.start();
           setIsListening(true);
@@ -154,7 +120,6 @@ export default function SimpleChat() {
       setLoading(false);
     }
   };
-  
 
   const goBack = () => {
     stopAudio();
