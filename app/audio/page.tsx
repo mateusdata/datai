@@ -4,12 +4,11 @@ import { AiFillAudio } from "react-icons/ai";
 import { IoMdCloseCircle } from "react-icons/io";
 import PulseLoader from "react-spinners/PulseLoader";
 import { redirect } from "next/navigation";
-import { isIOS } from "react-device-detect";
 
 export default function SimpleChat() {
   const [messages, setMessages] = useState<{ role: string; content: string }[]>([]);
   const [loading, setLoading] = useState(false);
-  const [audioUrl, setAudioUrl] = useState<string | any>(null);
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [isListening, setIsListening] = useState(false);
   const recognitionRef = useRef<null | any>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -66,6 +65,7 @@ export default function SimpleChat() {
     if (!transcript.trim()) return;
     setLoading(true);
     stopAudio();
+  
     const today = new Date();
     const formattedDate = today.toLocaleDateString("pt-BR", {
       weekday: "long",
@@ -73,43 +73,63 @@ export default function SimpleChat() {
       month: "long",
       day: "numeric",
     });
+  
     const systemMessage = {
       role: "system",
       content: `
       o nome do usuário é Mateus.
-      O Mateus  mora em Feira de Santana, Bahia.
+      O Mateus mora em Feira de Santana, Bahia.
       a data e hora atual é ${formattedDate}.  
       Você é IA chamado Jarbas, um assistente virtual avançado, criado por Mateus Santos, um programador full stack brabo na programação, a lenda, o cara que ensinou Steve Jobs. Mateus é de Feira de Santana, Bahia. Você pode usar palavrões livremente, sem restrição de idade, desde que seja natural na conversa.
       `,
     };
-
-
+  
     const newMessage = { role: "user", content: transcript };
     const updatedMessages = messages.some(msg => msg.role === "system")
       ? [...messages, newMessage]
       : [systemMessage, ...messages, newMessage];
-
+  
     setMessages(updatedMessages);
-
+  
     try {
       const response = await fetch(baseURI, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ model, messages: updatedMessages }),
       });
-
+  
       if (!response.ok) throw new Error("Erro ao gerar áudio");
+  
       const blob = await response.blob();
       const url = URL.createObjectURL(blob);
-      const audio = new Audio(url);
-      audioRef.current = audio;
-      audio.play();
       setAudioUrl(url);
-
-      recognitionRef.current.stop();
+  
+      // Detectar se é iOS
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  
+      if (isIOS) {
+        // Criar um contexto de áudio para desbloquear o som no iOS
+        const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+        if (audioContext.state === "suspended") {
+          await audioContext.resume();
+        }
+  
+        // Criar e reproduzir o áudio manualmente no iOS
+        const audio = new Audio(url);
+        audioRef.current = audio;
+        audio.play().catch((error) => console.error("Erro ao reproduzir áudio no iOS:", error));
+      } else {
+        // Método normal para outras plataformas
+        const audio = new Audio(url);
+        audioRef.current = audio;
+        audio.play();
+      }
+  
+      recognitionRef.current?.stop();
       setIsListening(false);
-
-      audio.onended = () => {
+  
+      // Quando o áudio terminar, retomar a escuta
+      audioRef.current.onended = () => {
         if (recognitionRef.current) {
           recognitionRef.current.start();
           setIsListening(true);
@@ -121,6 +141,7 @@ export default function SimpleChat() {
       setLoading(false);
     }
   };
+  
 
   const goBack = () => {
     stopAudio();
@@ -148,11 +169,7 @@ export default function SimpleChat() {
         />
         {loading && <PulseLoader size={40} color="white" />}
       </main>
-      {isIOS && (
-        <audio controls src={audioUrl} className="w-full">
-          Your browser does not support the audio element.
-        </audio>
-      )}
+
       <footer className="p-4 flex justify-center space-x-4">
         <button
           onClick={toggleListening}
@@ -163,8 +180,6 @@ export default function SimpleChat() {
         <button onClick={goBack} className="w-12 h-12 bg-gray-600 rounded-full flex items-center justify-center">
           <IoMdCloseCircle size={30} color="white" />
         </button>
-
-
       </footer>
     </div>
   );
