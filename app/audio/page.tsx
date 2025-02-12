@@ -104,20 +104,33 @@ export default function SimpleChat() {
       const url = URL.createObjectURL(blob);
       setAudioUrl(url);
   
-      // Detectar se é iOS
+      // Detecta se é iOS
       const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
   
       if (isIOS) {
-        // Criar um contexto de áudio para desbloquear o som no iOS
+        console.log("Rodando no iOS, tentando desbloquear áudio...");
+  
+        // Criar um contexto de áudio
         const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
         if (audioContext.state === "suspended") {
           await audioContext.resume();
         }
   
-        // Criar e reproduzir o áudio manualmente no iOS
+        // Criar um novo elemento de áudio
         const audio = new Audio(url);
         audioRef.current = audio;
-        audio.play().catch((error) => console.error("Erro ao reproduzir áudio no iOS:", error));
+  
+        // Forçar carregamento antes de tocar (hack para iOS)
+        audio.load();
+  
+        // Tocar o áudio dentro de um evento de usuário (garantia)
+        document.body.addEventListener("click", () => {
+          audio.play().catch((err) => console.error("Erro ao forçar reprodução no iOS:", err));
+        });
+  
+        setTimeout(() => {
+          audio.play().catch((err) => console.error("Erro ao reproduzir áudio no iOS:", err));
+        }, 500);
       } else {
         // Método normal para outras plataformas
         const audio = new Audio(url);
