@@ -196,20 +196,22 @@ export default function App() {
   return (
     <div className="h-screen w-screen bg-gray-9 text-white flex flex-col">
       <header className="flex items-center md:px-28 justify-between bg-gray-800 p-4 shadow-md w-full">
-        {/* Select alinhado à esquerda */}
+       
         <div className="w-auto">
           <select
             value={selectedModel}
             onChange={handleChange}
             className="p-2 border w-52 rounded-lg bg-gray-800 text-white outline-none border-none"
           >
-            <option value="deepseek-v2">deepseek-v2</option>
+            <option value="deepseek-v2">Modelo deepseek-v2</option>
             <option value="deepseek-r1">Modelo deepseek-r1</option>
-            <option value="phi4">Phi 4</option>
+            <option value="phi4">Modelo Phi 4</option>
+            <option value="qwen2.5">Modelo qwen2.5</option>
+
 
           </select>
         </div>
-        {/* Nome e Ícone do DatAI centralizados */}
+       
         <div className="flex items-center gap-2 text-white text-lg font-bold">
           <BsClipboardDataFill color="white" />
           <span>DatAI</span>

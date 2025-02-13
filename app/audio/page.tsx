@@ -40,16 +40,11 @@ export default function SimpleChat() {
       recognitionRef.current.onend = () => setIsListening(false);
       recognitionRef.current.onerror = () => setIsListening(false);
     } else {
-      alert("Seu navegador não suporta reconhecimento de voz.");
+      //alert("Seu navegador não suporta reconhecimento de voz.");
     }
   }, []);
 
-  const stopResponse = () => {
-    setLoading(false);
-    if (recognitionRef.current) recognitionRef.current.stop();
-    setIsListening(false);
-    stopAudio();
-  };
+ 
 
   const toggleListening = async () => {
     if (audioRef.current && !audioRef.current.paused) {
@@ -127,6 +122,7 @@ export default function SimpleChat() {
   };
 
   const stopAudio = () => {
+    //alert("oi")
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
@@ -137,6 +133,7 @@ export default function SimpleChat() {
   return (
     <div className="flex flex-col h-screen bg-gray-950 text-white">
       <header className="flex justify-between p-4 bg-gray-950">
+
         <span>Modelo {model}</span>
         <span className="text-sm">{isListening ? "🟢 Está falando..." : "⚪ Não está falando"}</span>
       </header>
@@ -155,6 +152,8 @@ export default function SimpleChat() {
         >
           <AiFillAudio size={30} color="white" />
         </button>
+        <button onClick={stopAudio}>stopAudio</button>
+
         <button onClick={goBack} className="w-12 h-12 bg-gray-600 rounded-full flex items-center justify-center">
           <IoMdCloseCircle size={30} color="white" />
         </button>
