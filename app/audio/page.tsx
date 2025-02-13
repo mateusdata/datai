@@ -13,7 +13,7 @@ export default function SimpleChat() {
   const recognitionRef = useRef<null | any>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [model, setModel] = useState("deepseek-v2");
-  const baseURI = "https://feb6-2804-7d74-8f-e100-72f3-cad0-e23c-a635.ngrok-free.app/api/chat2";
+  const baseURI = "https://4a2d-2804-7d74-8f-e100-cd5f-a063-8574-dae2.ngrok-free.app/api/chat2";
 
   useEffect(() => {
     if (recognitionRef.current) {
@@ -71,17 +71,22 @@ export default function SimpleChat() {
       role: "system",
       content: `
       o nome do usuário é Mateus.
-      O Mateus  mora em Feira de Santana, Bahia.
+      O Mateus mora em Feira de Santana, Bahia.
       a data e hora atual é ${formattedDate}.  
       Você é IA chamado Jarbas, um assistente virtual avançado, criado por Mateus Santos, um programador full stack brabo na programação, a lenda, o cara que ensinou Steve Jobs. Mateus é de Feira de Santana, Bahia. Você pode usar palavrões livremente, sem restrição de idade, desde que seja natural na conversa.
       `,
+    };
+
+    const greetingMessage = {
+      role: "user",
+      content: "Bom dia Mateus, como posso ajudar você?",
     };
     
 
     const newMessage = { role: "user", content: transcript };
     const updatedMessages = messages.some(msg => msg.role === "system")
       ? [...messages, newMessage]
-      : [systemMessage, ...messages, newMessage];
+      : [systemMessage, greetingMessage, newMessage];
 
     setMessages(updatedMessages);
 
