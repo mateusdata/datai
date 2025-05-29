@@ -65,9 +65,9 @@ export default function ChatPage() {
     const systemMessage = {
       role: "system",
       content: `
-        O nome do usuário é Mateus. Ele mora em Feira de Santana, Bahia.
-        A data e hora atual é ${formattedDate}.
-        Você é Jarbas, um assistente virtual criado por Mateus Santos. Seja direto, fale como gente, sem filtro.
+        Não retorne emogins nem carateres espediais como * ** *** ou && ### 
+        não retorne nada que não seja texto puro,
+        não retone em formato de markdown.
       `,
     };
 
@@ -112,44 +112,76 @@ export default function ChatPage() {
     stopAudio();
     redirect("/");
   };
-
-  return (
+return (
     <div className="flex flex-col h-screen bg-gray-950 text-white">
-      <header className="flex justify-between items-center p-4 bg-gray-950">
-        <span>Modelo: Gemini</span>
-        <span className="text-sm">{isListening ? "🟢 Está falando..." : "⚪ Não está falando"}</span>
+      <header className="flex justify-between items-center p-4 bg-gray-950 border-b border-gray-800">
+        <span>Modelo: Gemini Flash</span>
+        <div className="flex items-center space-x-2">
+            {isListening && <PulseLoader size={6} color="lightgreen" speedMultiplier={0.7} />}
+            <span className={`text-sm ${isListening ? "text-green-400" : "text-gray-400"}`}>
+            {isListening ? "Ouvindo..." : (loading ? "Processando..." : "Aguardando")}
+            </span>
+        </div>
       </header>
 
-      <main className="flex-1 flex flex-col items-center justify-center space-y-4">
+      <main className="flex-1 flex flex-col items-center justify-center space-y-6 p-4 overflow-y-auto">
+        {/* Example of how messages could be displayed */}
+        {/* <div className="w-full max-w-2xl space-y-4">
+          {messages.map((msg, index) => (
+            <div key={index} className={`p-3 rounded-lg ${msg.role === 'user' ? 'bg-blue-600 ml-auto' : (msg.role === 'assistant' ? 'bg-gray-700 mr-auto' : 'bg-yellow-600 text-black text-xs text-center mx-auto')}`}>
+              <p className="text-sm font-semibold">{msg.role === 'user' ? 'Você' : (msg.role === 'assistant' ? 'Jarbas' : 'Sistema')}</p>
+              <p>{msg.content}</p>
+            </div>
+          ))}
+        </div> */}
+
         <div
-          className={`rounded-full transition-all duration-300 ${
-            isListening
-              ? "w-40 h-40 bg-white border-2"
-              : "w-52 h-52 bg-gradient-to-r from-blue-500 via-green-500 to-purple-500 animate-pulse"
-          }`}
-        />
-        {loading && <PulseLoader size={40} color="white" />}
+          className={`rounded-full transition-all duration-300 ease-in-out flex items-center justify-center
+            ${isListening
+              ? "w-40 h-40 bg-green-500 shadow-xl border-4 border-green-300"
+              : (loading ? "w-48 h-48 bg-gray-700" : "w-52 h-52 bg-gradient-to-br animate-pulse from-blue-600 via-purple-600 to-pink-600")}
+            ${loading ? "animate-none" : (isListening ? "" : "hover:opacity-90")}
+          `}
+        >
+          {loading && <PulseLoader size={30} color="white" />}
+          {!loading && !isListening && (
+            <AiFillAudio size={80} color="rgba(255,255,255,0.8)" className="opacity-50" />
+          )}
+           {isListening && (
+             <div className="text-center">
+                <AiFillAudio size={50} color="white" />
+                <p className="text-xs mt-2 text-white"></p>
+             </div>
+           )}
+        </div>
       </main>
 
-      <footer className="p-4 flex justify-center space-x-4">
+      <footer className="p-4 flex justify-center items-center space-x-4 bg-gray-950 border-t border-gray-800">
         <button
           onClick={toggleListening}
-          className={`w-12 h-12 rounded-full flex items-center justify-center ${
-            isListening ? "bg-red-500 animate-pulse" : "bg-gray-600 hover:bg-gray-700"
-          }`}
+          disabled={loading} // Disable button when loading to prevent multiple requests
+          className={`w-16 h-16 rounded-full flex items-center justify-center transition-colors
+            ${isListening
+              ? "bg-red-500 hover:bg-red-600 animate-pulse"
+              : "bg-blue-500 hover:bg-blue-600"
+            }
+            disabled:bg-gray-500 disabled:cursor-not-allowed
+          `}
+          aria-label={isListening ? "Parar de ouvir" : "Começar a ouvir"}
         >
           <AiFillAudio size={30} color="white" />
         </button>
-        <button onClick={stopAudio} className="px-4 py-2 text-sm bg-gray-700 rounded-lg">
-          stopAudio
-        </button>
+        {/* Removed explicit stopAudio button as toggleListening and audio ending handle this */}
+        {/* You can add it back if you need an explicit manual stop for audio that doesn't affect listening state */}
         <button
           onClick={goBack}
-          className="w-12 h-12 bg-gray-600 rounded-full flex items-center justify-center"
+          className="w-12 h-12 bg-gray-700 hover:bg-gray-600 rounded-full flex items-center justify-center transition-colors"
+          aria-label="Voltar"
         >
           <IoMdCloseCircle size={30} color="white" />
         </button>
       </footer>
     </div>
-  );
+)
+
 }

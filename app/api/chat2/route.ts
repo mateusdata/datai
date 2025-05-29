@@ -69,10 +69,11 @@ export async function POST(req: NextRequest) {
     const textoGerado = await gerarTextoComGemini(model, messages);
 
     console.log("🔊 Enviando para Piper TTS...");
-    const piperRes = await axios.post(PIPER_HOST!, textoGerado, {
-      headers: { 'Content-Type': 'text/plain' },
-      responseType: 'stream'
+    const piperRes = await axios.get(PIPER_HOST!, {
+      params: { text: textoGerado },
+      responseType: 'stream',
     });
+
 
     const nodeStream = piperRes.data as Readable;
     const webStream = Readable.toWeb(nodeStream);
