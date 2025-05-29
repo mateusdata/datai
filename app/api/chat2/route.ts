@@ -15,14 +15,13 @@ if (!PIPER_HOST) {
 
 const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
 
-async function gerarTextoComGemini(model: string, messages: any[]): Promise<string> {
+async function gerarTextoComGemini(model: string, messages: { role: string, content: string }[]): Promise<string> {
   console.log("🧠 Chamando gerarTextoComGemini...");
 
   const systemMsg = messages.find(m => m.role === 'system');
-  console.log("🔍 Buscando mensagem de sistema...");
-
   const history = messages.filter(m => m.role === 'user' || m.role === 'model');
-  console.log("📚 Histórico de mensagens:", history);
+
+  console.log("📚 Histórico de mensagens:", history.map(h => h.content));
 
   const chat = ai.chats.create({
     model,
@@ -38,15 +37,17 @@ async function gerarTextoComGemini(model: string, messages: any[]): Promise<stri
   });
 
   const lastUser = history[history.length - 1];
+  if (!lastUser || !lastUser.content) {
+    throw new Error("Última mensagem do usuário está vazia.");
+  }
+
   console.log("🧠 Enviando última mensagem do usuário:", lastUser.content);
 
-  const result = await chat.sendMessage({
-    message: lastUser.content,
-  });
-
+  const result = await chat.sendMessage({ message: lastUser.content });
   const resposta = result?.text;
-  if (!resposta) {
-    throw new Error("Texto gerado pelo Gemini está vazio.");
+
+  if (!resposta || typeof resposta !== "string") {
+    throw new Error("Texto gerado pelo Gemini está vazio ou inválido.");
   }
 
   console.log("✅ Texto gerado pelo Gemini:", resposta);
@@ -68,12 +69,12 @@ export async function POST(req: NextRequest) {
     const textoGerado = await gerarTextoComGemini(model, messages);
 
     console.log("🔊 Enviando para Piper TTS...");
-    const piperRes = await axios.post(PIPER_HOST, textoGerado, {
+    const piperRes = await axios.post(PIPER_HOST!, textoGerado, {
       headers: { 'Content-Type': 'text/plain' },
       responseType: 'stream'
     });
 
-    const nodeStream = piperRes.data as import("stream").Readable;
+    const nodeStream = piperRes.data as Readable;
     const webStream = Readable.toWeb(nodeStream);
 
     console.log("📤 Respondendo com stream de áudio...");

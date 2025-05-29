@@ -17,7 +17,7 @@ export default function ChatPage() {
 
   useEffect(() => {
     if ("webkitSpeechRecognition" in window) {
-      const SpeechRecognition = window.webkitSpeechRecognition;
+      const SpeechRecognition:any = window.webkitSpeechRecognition;
       recognitionRef.current = new SpeechRecognition();
       recognitionRef.current.continuous = true;
       recognitionRef.current.lang = "pt-BR";
