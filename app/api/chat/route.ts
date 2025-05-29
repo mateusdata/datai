@@ -5,6 +5,7 @@ env: {
   GEMINI_API_KEY: "string";
 }
 
+
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
 
 async function streamGeminiChat(model: string, messages: any[]): Promise<ReadableStream> {
